@@ -1,0 +1,2 @@
+Number of strongly connected components: 1
+Component 1: 4 0 1 2 3 

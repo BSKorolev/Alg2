@@ -1,27 +1,58 @@
+/*
+Р¤СѓРЅРєС†РёСЏ distribute_items РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµС‚ СЃРїРёСЃРѕРє box_items, РєРѕС‚РѕСЂС‹Р№ РїСЂРµРґСЃС‚Р°РІР»СЏРµС‚ СЂР°СЃРїСЂРµРґРµР»РµРЅРёРµ РїСЂРµРґРјРµС‚РѕРІ РїРѕ СЏС‰РёРєР°Рј СЃ РїРѕРјРѕС‰СЊСЋ РЅСѓР»РµР№. 
+Р—Р°С‚РµРј РѕРЅР° РІС‹Р·С‹РІР°РµС‚ С„СѓРЅРєС†РёСЋ distribute_recursive, РєРѕС‚РѕСЂР°СЏ РїС‹С‚Р°РµС‚СЃСЏ СЂРµРєСѓСЂСЃРёРІРЅРѕ СЂР°СЃРїСЂРµРґРµР»РёС‚СЊ РїСЂРµРґРјРµС‚С‹ РїРѕ СЏС‰РёРєР°Рј. 
+Р•СЃР»Рё СЂР°СЃРїСЂРµРґРµР»РµРЅРёРµ РЅРµРІРѕР·РјРѕР¶РЅРѕ, С„СѓРЅРєС†РёСЏ РІРѕР·РІСЂР°С‰Р°РµС‚ РїСѓСЃС‚РѕР№ СЃРїРёСЃРѕРє. 
+Р’ РїСЂРѕС‚РёРІРЅРѕРј СЃР»СѓС‡Р°Рµ РѕРЅР° РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє, СЃРѕРґРµСЂР¶Р°С‰РёР№ СЂР°СЃРїСЂРµРґРµР»РµРЅРёРµ РїСЂРµРґРјРµС‚РѕРІ РїРѕ СЏС‰РёРєР°Рј.
+*/
 #include <iostream>
-#include <cmath>
+#include <vector>
+
 using namespace std;
 
-// Функция расчета минимального количества ящиков
-int calcMinBoxes(int n, int capacity) {
-    return ceil(n * 1.0 / capacity); // округляем до ближайшего целого числа (вверх)
+bool distribute_recursive(int num_items, int num_boxes, int max_items, vector<int>& box_items, int current_box);
+
+vector<int> distribute_items(int num_items, int num_boxes, int max_items) {
+    vector<int> box_items(num_boxes, 0);
+    if (!distribute_recursive(num_items, num_boxes, max_items, box_items, 0)) {
+        return vector<int>();
+    }
+    return box_items;
+}
+
+bool distribute_recursive(int num_items, int num_boxes, int max_items, vector<int>& box_items, int current_box) {
+    if (num_items == 0) {
+        return true;
+    }
+    if (current_box >= num_boxes) {
+        return false;
+    }
+    if (box_items[current_box] == max_items) {
+        return distribute_recursive(num_items, num_boxes, max_items, box_items, current_box + 1);
+    }
+    for (int i = min(num_items, max_items - box_items[current_box]); i >= 0; i--) {
+        box_items[current_box] += i;
+        if (distribute_recursive(num_items - i, num_boxes, max_items, box_items, current_box + 1)) {
+            return true;
+        }
+        box_items[current_box] -= i;
+    }
+    return false;
 }
 
 int main() {
     setlocale(LC_ALL, "Russian");
-    int n = 10; // количество объектов
-    int weight = 1.5; // вес каждого объекта в кг
-    int capacity = 5; // вместимость ящика в кг
-    int boxes = calcMinBoxes(n, capacity); // расчет минимального количества ящиков
-    cout << "Минимальное количество ящиков: " << boxes << endl;
-
-    // Распределение объектов по ящикам
-    int objCount = 0; // счетчик объектов
-    for (int i = 0; i < boxes; i++) {
-        int objInBox = min(n - objCount, capacity / weight); // количество объектов в ящике
-        objCount += objInBox; // обновляем счетчик объектов
-        cout << "Ящик " << i + 1 << ": " << objInBox << " объектов" << endl;
+    int num_items = 10;
+    int num_boxes = 3;  
+    int max_items = 4;
+    vector<int> box_items = distribute_items(num_items, num_boxes, max_items);
+    if (!box_items.empty()) {
+        cout << "РџСЂРµРґРјРµС‚С‹ СЂР°СЃРїСЂРµРґРµР»РµРЅС‹ РїРѕ СЏС‰РёРєР°Рј: ";
+        for (int item : box_items) {
+            cout << item << " ";
+        }
     }
-
+    else {
+        cout << "Р Р°СЃРїСЂРµРґРµР»РµРЅРёРµ РЅРµРІРѕР·РјРѕР¶РЅРѕ";
+    }
     return 0;
 }
